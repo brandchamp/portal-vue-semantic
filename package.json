@@ -16,7 +16,7 @@
     "url": "https://github.com/brandchamp/portal-vue-semantic/issues"
   },
   "homepage": "https://github.com/brandchamp/portal-vue-semantic#readme",
-  "#dependencies": {
+  "devDependencies": {
     "semantic-ui": "2.2.13"
   }
 }
