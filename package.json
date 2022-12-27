@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/brandchamp/portal-vue-semantic#readme",
   "devDependencies": {
-    "semantic-ui": "2.2.13"
+    "del": "^6.1.1",
+    "gulp": "^4.0.2",
+    "semantic-ui": "^2.5"
   }
 }
