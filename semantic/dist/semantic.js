@@ -1,15 +1,15 @@
  /*
- * # Semantic UI - 2.2.13
+ * # Semantic UI - 2.5.0
  * https://github.com/Semantic-Org/Semantic-UI
  * http://www.semantic-ui.com/
  *
- * Copyright 2014 Contributors
+ * Copyright 2022 Contributors
  * Released under the MIT license
  * http://opensource.org/licenses/MIT
  *
  */
 /*!
- * # Semantic UI 2.2.13 - API
+ * # Semantic UI 2.5.0 - API
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -20,7 +20,7 @@
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 var
   window = (typeof window != 'undefined' && window.Math == Math)
@@ -1177,7 +1177,7 @@ $.api.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Checkbox
+ * # Semantic UI 2.5.0 - Checkbox
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -1188,7 +1188,7 @@ $.api.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -2009,7 +2009,7 @@ $.fn.checkbox.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Dimmer
+ * # Semantic UI 2.5.0 - Dimmer
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -2020,7 +2020,7 @@ $.fn.checkbox.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -2093,7 +2093,6 @@ $.fn.dimmer = function(parameters) {
             else {
               $dimmer = module.create();
             }
-            module.set.variation();
           }
         },
 
@@ -2162,12 +2161,12 @@ $.fn.dimmer = function(parameters) {
 
         event: {
           click: function(event) {
-            module.verbose('Determining if event occured on dimmer', event);
+            module.verbose('Determining if event occurred on dimmer', event);
             if( $dimmer.find(event.target).length === 0 || $(event.target).is(selector.content) ) {
               module.hide();
               event.stopImmediatePropagation();
             }
-          }
+          },
         },
 
         addContent: function(element) {
@@ -2200,6 +2199,7 @@ $.fn.dimmer = function(parameters) {
             : function(){}
           ;
           module.debug('Showing dimmer', $dimmer, settings);
+          module.set.variation();
           if( (!module.is.dimmed() || module.is.animating()) && module.is.enabled() ) {
             module.animate.show(callback);
             settings.onShow.call(element);
@@ -2243,11 +2243,22 @@ $.fn.dimmer = function(parameters) {
               : function(){}
             ;
             if(settings.useCSS && $.fn.transition !== undefined && $dimmer.transition('is supported')) {
+              if(settings.useFlex) {
+                module.debug('Using flex dimmer');
+                module.remove.legacy();
+              }
+              else {
+                module.debug('Using legacy non-flex dimmer');
+                module.set.legacy();
+              }
               if(settings.opacity !== 'auto') {
                 module.set.opacity();
               }
               $dimmer
                 .transition({
+                  displayType : settings.useFlex
+                    ? 'flex'
+                    : 'block',
                   animation   : settings.transition + ' in',
                   queue       : false,
                   duration    : module.get.duration(),
@@ -2292,6 +2303,9 @@ $.fn.dimmer = function(parameters) {
               module.verbose('Hiding dimmer with css');
               $dimmer
                 .transition({
+                  displayType : settings.useFlex
+                    ? 'flex'
+                    : 'block',
                   animation   : settings.transition + ' out',
                   queue       : false,
                   duration    : module.get.duration(),
@@ -2300,6 +2314,7 @@ $.fn.dimmer = function(parameters) {
                     module.remove.dimmed();
                   },
                   onComplete  : function() {
+                    module.remove.variation();
                     module.remove.active();
                     callback();
                   }
@@ -2413,6 +2428,9 @@ $.fn.dimmer = function(parameters) {
             module.debug('Setting opacity to', opacity);
             $dimmer.css('background-color', color);
           },
+          legacy: function() {
+            $dimmer.addClass(className.legacy);
+          },
           active: function() {
             $dimmer.addClass(className.active);
           },
@@ -2441,6 +2459,9 @@ $.fn.dimmer = function(parameters) {
             $dimmer
               .removeClass(className.active)
             ;
+          },
+          legacy: function() {
+            $dimmer.removeClass(className.legacy);
           },
           dimmed: function() {
             $dimmable.removeClass(className.dimmed);
@@ -2655,6 +2676,9 @@ $.fn.dimmer.settings = {
   verbose     : false,
   performance : true,
 
+  // whether should use flex layout
+  useFlex     : true,
+
   // name to distinguish between multiple dimmers in context
   dimmerName  : false,
 
@@ -2698,6 +2722,7 @@ $.fn.dimmer.settings = {
     dimmer     : 'dimmer',
     disabled   : 'disabled',
     hide       : 'hide',
+    legacy     : 'legacy',
     pageDimmer : 'page',
     show       : 'show'
   },
@@ -2718,7 +2743,7 @@ $.fn.dimmer.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Dropdown
+ * # Semantic UI 2.5.0 - Dropdown
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -2729,7 +2754,7 @@ $.fn.dimmer.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -3215,7 +3240,7 @@ $.fn.dropdown = function(parameters) {
             ? callback
             : function(){}
           ;
-          if( module.is.active() ) {
+          if( module.is.active() && !module.is.animatingOutward() ) {
             module.debug('Hiding dropdown');
             if(settings.onHide.call(element) !== false) {
               module.animate.hide(function() {
@@ -3324,7 +3349,6 @@ $.fn.dropdown = function(parameters) {
             else {
               if(settings.on == 'click') {
                 $module
-                  .on('click' + eventNamespace, selector.icon, module.event.icon.click)
                   .on('click' + eventNamespace, module.event.test.toggle)
                 ;
               }
@@ -3340,6 +3364,7 @@ $.fn.dropdown = function(parameters) {
                 ;
               }
               $module
+                .on('click' + eventNamespace, selector.icon, module.event.icon.click)
                 .on('mousedown' + eventNamespace, module.event.mousedown)
                 .on('mouseup'   + eventNamespace, module.event.mouseup)
                 .on('focus'     + eventNamespace, module.event.focus)
@@ -3473,10 +3498,19 @@ $.fn.dropdown = function(parameters) {
                 callback();
               },
               onSuccess : function(response) {
-                module.remove.message();
-                module.setup.menu({
-                  values: response[fields.remoteValues]
-                });
+                var
+                  values          = response[fields.remoteValues],
+                  hasRemoteValues = ($.isArray(values) && values.length > 0)
+                ;
+                if(hasRemoteValues) {
+                  module.remove.message();
+                  module.setup.menu({
+                    values: response[fields.remoteValues]
+                  });
+                }
+                else {
+                  module.add.message(message.noResults);
+                }
                 callback();
               }
             }
@@ -3729,7 +3763,12 @@ $.fn.dropdown = function(parameters) {
           },
           icon: {
             click: function(event) {
-              module.toggle();
+              if($icon.hasClass(className.clear)) {
+                module.clear();
+              }
+              else if (module.can.click()) {
+                module.toggle();
+              }
             }
           },
           text: {
@@ -4336,7 +4375,7 @@ $.fn.dropdown = function(parameters) {
               : text
             ;
             if( module.can.activate( $(element) ) ) {
-              module.set.value(value, $(element));
+              module.set.value(value, text, $(element));
               if(module.is.multiple() && !module.is.allFiltered()) {
                 return;
               }
@@ -4356,7 +4395,7 @@ $.fn.dropdown = function(parameters) {
           },
 
           hide: function(text, value, element) {
-            module.set.value(value, text);
+            module.set.value(value, text, $(element));
             module.hideAndClear();
           }
 
@@ -5002,7 +5041,7 @@ $.fn.dropdown = function(parameters) {
             var
               length = module.get.query().length
             ;
-            $search.val( text.substr(0 , length));
+            $search.val( text.substr(0, length));
           },
           scrollPosition: function($item, forceScroll) {
             var
@@ -5154,7 +5193,6 @@ $.fn.dropdown = function(parameters) {
             var
               escapedValue = module.escape.value(value),
               hasInput     = ($input.length > 0),
-              isAddition   = !module.has.value(value),
               currentValue = module.get.values(),
               stringValue  = (value !== undefined)
                 ? String(value)
@@ -5190,6 +5228,15 @@ $.fn.dropdown = function(parameters) {
               module.verbose('Storing value in metadata', escapedValue, $input);
               if(escapedValue !== currentValue) {
                 $module.data(metadata.value, stringValue);
+              }
+            }
+            if(module.is.single() && settings.clearable) {
+              // treat undefined or '' as empty
+              if(!escapedValue) {
+                module.remove.clearable();
+              }
+              else {
+                module.set.clearable();
               }
             }
             if(settings.fireOnInit === false && module.is.initialLoad()) {
@@ -5257,8 +5304,8 @@ $.fn.dropdown = function(parameters) {
                       module.save.remoteData(selectedText, selectedValue);
                     }
                     if(settings.useLabels) {
-                      module.add.value(selectedValue, selectedText, $selected);
                       module.add.label(selectedValue, selectedText, shouldAnimate);
+                      module.add.value(selectedValue, selectedText, $selected);
                       module.set.activeItem($selected);
                       module.filterActive();
                       module.select.nextAvailable($selectedItem);
@@ -5287,7 +5334,10 @@ $.fn.dropdown = function(parameters) {
                 }
               })
             ;
-          }
+          },
+          clearable: function() {
+            $icon.addClass(className.clear);
+          },
         },
 
         add: {
@@ -5299,6 +5349,9 @@ $.fn.dropdown = function(parameters) {
               escapedValue = module.escape.value(value),
               $label
             ;
+            if(settings.ignoreCase) {
+              escapedValue = escapedValue.toLowerCase();
+            }
             $label =  $('<a />')
               .addClass(className.label)
               .attr('data-' + metadata.value, escapedValue)
@@ -5307,7 +5360,7 @@ $.fn.dropdown = function(parameters) {
             $label = settings.onLabelCreate.call($label, escapedValue, text);
 
             if(module.has.label(value)) {
-              module.debug('Label already exists, skipping', escapedValue);
+              module.debug('User selection already exists, skipping', escapedValue);
               return;
             }
             if(settings.label.variation) {
@@ -5446,6 +5499,10 @@ $.fn.dropdown = function(parameters) {
               currentValue = module.get.values(),
               newValue
             ;
+            if(module.has.value(addedValue)) {
+              module.debug('Value already selected');
+              return;
+            }
             if(addedValue === '') {
               module.debug('Cannot select blank values from multiselect');
               return;
@@ -5478,7 +5535,7 @@ $.fn.dropdown = function(parameters) {
             }
             module.set.value(newValue, addedValue, addedText, $selectedItem);
             module.check.maxSelections();
-          }
+          },
         },
 
         remove: {
@@ -5703,6 +5760,9 @@ $.fn.dropdown = function(parameters) {
                 .removeAttr('tabindex')
               ;
             }
+          },
+          clearable: function() {
+            $icon.removeClass(className.clear);
           }
         },
 
@@ -5759,6 +5819,9 @@ $.fn.dropdown = function(parameters) {
               escapedValue = module.escape.value(value),
               $labels      = $module.find(selector.label)
             ;
+            if(settings.ignoreCase) {
+              escapedValue = escapedValue.toLowerCase();
+            }
             return ($labels.filter('[data-' + metadata.value + '="' + module.escape.string(escapedValue) +'"]').length > 0);
           },
           maxSelections: function() {
@@ -5777,6 +5840,12 @@ $.fn.dropdown = function(parameters) {
             return (module.get.query() !== '');
           },
           value: function(value) {
+            return (settings.ignoreCase)
+              ? module.has.valueIgnoringCase(value)
+              : module.has.valueMatchingCase(value)
+            ;
+          },
+          valueMatchingCase: function(value) {
             var
               values   = module.get.values(),
               hasValue = $.isArray(values)
@@ -5787,12 +5856,34 @@ $.fn.dropdown = function(parameters) {
               ? true
               : false
             ;
+          },
+          valueIgnoringCase: function(value) {
+            var
+              values   = module.get.values(),
+              hasValue = false
+            ;
+            if(!$.isArray(values)) {
+              values = [values];
+            }
+            $.each(values, function(index, existingValue) {
+              if(String(value).toLowerCase() == String(existingValue).toLowerCase()) {
+                hasValue = true;
+                return false;
+              }
+            });
+            return hasValue;
           }
         },
 
         is: {
           active: function() {
             return $module.hasClass(className.active);
+          },
+          animatingInward: function() {
+            return $menu.transition('is inward');
+          },
+          animatingOutward: function() {
+            return $menu.transition('is outward');
           },
           bubbledLabelClick: function(event) {
             return $(event.target).is('select, input') && $module.closest('label').length > 0;
@@ -5929,6 +6020,9 @@ $.fn.dropdown = function(parameters) {
             ;
             calculations = {
               context: {
+                offset    : ($context.get(0) === window)
+                  ? { top: 0, left: 0}
+                  : $context.offset(),
                 scrollTop : $context.scrollTop(),
                 height    : $context.outerHeight()
               },
@@ -5941,8 +6035,8 @@ $.fn.dropdown = function(parameters) {
               calculations.menu.offset.top += calculations.context.scrollTop;
             }
             onScreen = {
-              above : (calculations.context.scrollTop) <= calculations.menu.offset.top - calculations.menu.height,
-              below : (calculations.context.scrollTop + calculations.context.height) >= calculations.menu.offset.top + calculations.menu.height
+              above : (calculations.context.scrollTop) <= calculations.menu.offset.top - calculations.context.offset.top - calculations.menu.height,
+              below : (calculations.context.scrollTop + calculations.context.height) >= calculations.menu.offset.top - calculations.context.offset.top + calculations.menu.height
             };
             if(onScreen.below) {
               module.verbose('Dropdown can fit in context downward', onScreen);
@@ -5971,6 +6065,9 @@ $.fn.dropdown = function(parameters) {
             ;
             calculations = {
               context: {
+                offset     : ($context.get(0) === window)
+                  ? { top: 0, left: 0}
+                  : $context.offset(),
                 scrollLeft : $context.scrollLeft(),
                 width      : $context.outerWidth()
               },
@@ -5982,7 +6079,7 @@ $.fn.dropdown = function(parameters) {
             if(module.is.horizontallyScrollableContext()) {
               calculations.menu.offset.left += calculations.context.scrollLeft;
             }
-            isOffscreenRight = (calculations.menu.offset.left + calculations.menu.width >= calculations.context.scrollLeft + calculations.context.width);
+            isOffscreenRight = (calculations.menu.offset.left - calculations.context.offset.left + calculations.menu.width >= calculations.context.scrollLeft + calculations.context.width);
             if(isOffscreenRight) {
               module.verbose('Dropdown cannot fit in context rightward', isOffscreenRight);
               canOpenRightward = false;
@@ -6088,7 +6185,7 @@ $.fn.dropdown = function(parameters) {
                     duration   : settings.duration,
                     debug      : settings.debug,
                     verbose    : settings.verbose,
-                    queue      : true,
+                    queue      : false,
                     onStart    : start,
                     onComplete : function() {
                       callback.call(element);
@@ -6353,6 +6450,8 @@ $.fn.dropdown.settings = {
 
   values                 : false,      // specify values to use for dropdown
 
+  clearable              : false,      // whether the value of the dropdown can be cleared
+
   apiSettings            : false,
   selectOnKeydown        : true,       // Whether selection should occur automatically when keyboard shortcuts used
   minCharacters          : 0,          // Minimum characters required to trigger API call
@@ -6376,7 +6475,8 @@ $.fn.dropdown.settings = {
   forceSelection         : true,       // force a choice on blur with search selection
 
   allowAdditions         : false,      // whether multiple select should allow user added values
-  hideAdditions          : true,      // whether or not to hide special message prompting a user they can enter a value
+  ignoreCase             : false,       // whether to consider values not matching in case to be the same
+  hideAdditions          : true,       // whether or not to hide special message prompting a user they can enter a value
 
   maxSelections          : false,      // When set to a number limits the number of selections to this count
   useLabels              : true,       // whether multiple select should filter currently active selections from choices
@@ -6504,6 +6604,7 @@ $.fn.dropdown.settings = {
     active      : 'active',
     addition    : 'addition',
     animating   : 'animating',
+    clear       : 'clear',
     disabled    : 'disabled',
     empty       : 'empty',
     dropdown    : 'ui dropdown',
@@ -6570,7 +6671,7 @@ $.fn.dropdown.settings.templates = {
           ? 'disabled '
           : ''
       ;
-      html += '<div class="'+ maybeDisabled +'item" data-value="' + option[fields.value] + '"' + maybeText + '>'
+      html += '<div class="'+ maybeDisabled +'item" data-value="' + option[fields.value] + '"' + maybeText + '>';
       html +=   option[fields.name];
       html += '</div>';
     });
@@ -6598,7 +6699,7 @@ $.fn.dropdown.settings.templates = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Form Validation
+ * # Semantic UI 2.5.0 - Form Validation
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -6609,7 +6710,7 @@ $.fn.dropdown.settings.templates = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -6957,7 +7058,7 @@ $.fn.form = function(parameters) {
                   module.validate.field( validationRules );
                 }
               }
-              else if(settings.on == 'blur' || settings.on == 'change') {
+              else if(settings.on == 'blur') {
                 if(validationRules) {
                   module.validate.field( validationRules );
                 }
@@ -7034,16 +7135,16 @@ $.fn.form = function(parameters) {
             var
               ruleName      = module.get.ruleName(rule),
               ancillary     = module.get.ancillaryValue(rule),
-              prompt        = rule.prompt || settings.prompt[ruleName] || settings.text.unspecifiedRule,
+              $field        = module.get.field(field.identifier),
+              value         = $field.val(),
+              prompt        = $.isFunction(rule.prompt)
+                ? rule.prompt(value)
+                : rule.prompt || settings.prompt[ruleName] || settings.text.unspecifiedRule,
               requiresValue = (prompt.search('{value}') !== -1),
               requiresName  = (prompt.search('{name}') !== -1),
               $label,
-              $field,
               name
             ;
-            if(requiresName || requiresValue) {
-              $field = module.get.field(field.identifier);
-            }
             if(requiresValue) {
               prompt = prompt.replace('{value}', $field.val());
             }
@@ -7202,9 +7303,9 @@ $.fn.form = function(parameters) {
                 }
                 else {
                   if(isRadio) {
-                    if(values[name] === undefined) {
+                    if(values[name] === undefined || values[name] == false) {
                       values[name] = (isChecked)
-                        ? true
+                        ? value || true
                         : false
                       ;
                     }
@@ -7862,10 +7963,10 @@ $.fn.form.settings = {
     isExactly            : '{name} must be exactly "{ruleValue}"',
     not                  : '{name} cannot be set to "{ruleValue}"',
     notExactly           : '{name} cannot be set to exactly "{ruleValue}"',
-    contain              : '{name} cannot contain "{ruleValue}"',
-    containExactly       : '{name} cannot contain exactly "{ruleValue}"',
-    doesntContain        : '{name} must contain  "{ruleValue}"',
-    doesntContainExactly : '{name} must contain exactly "{ruleValue}"',
+    contain              : '{name} must contain "{ruleValue}"',
+    containExactly       : '{name} must contain exactly "{ruleValue}"',
+    doesntContain        : '{name} cannot contain  "{ruleValue}"',
+    doesntContainExactly : '{name} cannot contain exactly "{ruleValue}"',
     minLength            : '{name} must be at least {ruleValue} characters',
     length               : '{name} must be at least {ruleValue} characters',
     exactLength          : '{name} must be exactly {ruleValue} characters',
@@ -8305,7 +8406,7 @@ $.fn.form.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Modal
+ * # Semantic UI 2.5.0 - Modal
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -8316,7 +8417,7 @@ $.fn.form.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -8414,6 +8515,9 @@ $.fn.modal = function(parameters) {
             var
               defaultSettings = {
                 debug      : settings.debug,
+                variation  : settings.centered
+                  ? false
+                  : 'top aligned',
                 dimmerName : 'modals'
               },
               dimmerSettings = $.extend(true, defaultSettings, settings.dimmerSettings)
@@ -8434,13 +8538,16 @@ $.fn.modal = function(parameters) {
             $dimmer = $dimmable.dimmer('get dimmer');
           },
           id: function() {
-            id = (Math.random().toString(16) + '000000000').substr(2,8);
+            id = (Math.random().toString(16) + '000000000').substr(2, 8);
             elementEventNamespace = '.' + id;
             module.verbose('Creating unique id for element', id);
           }
         },
 
         destroy: function() {
+          if (observer) {
+            observer.disconnect();
+          }
           module.verbose('Destroying previous modal');
           $module
             .removeData(moduleNamespace)
@@ -8469,9 +8576,11 @@ $.fn.modal = function(parameters) {
         refresh: function() {
           module.remove.scrolling();
           module.cacheSizes();
+          if(!module.can.useFlex()) {
+            module.set.modalOffset();
+          }
           module.set.screenHeight();
           module.set.type();
-          module.set.position();
         },
 
         refreshModals: function() {
@@ -8510,12 +8619,22 @@ $.fn.modal = function(parameters) {
             $window
               .on('resize' + elementEventNamespace, module.event.resize)
             ;
+          },
+          scrollLock: function() {
+            // touch events default to passive, due to changes in chrome to optimize mobile perf
+            $dimmable.get(0).addEventListener('touchmove', module.event.preventScroll, { passive: false });
+          }
+        },
+
+        unbind: {
+          scrollLock: function() {
+            $dimmable.get(0).removeEventListener('touchmove', module.event.preventScroll, { passive: false });
           }
         },
 
         get: {
           id: function() {
-            return (Math.random().toString(16) + '000000000').substr(2,8);
+            return (Math.random().toString(16) + '000000000').substr(2, 8);
           }
         },
 
@@ -8529,6 +8648,9 @@ $.fn.modal = function(parameters) {
             module.hide(function() {
               ignoreRepeatedEvents = false;
             });
+          },
+          preventScroll: function(event) {
+            event.preventDefault();
           },
           deny: function() {
             if(ignoreRepeatedEvents || settings.onDeny.call(element, $(this)) === false) {
@@ -8544,21 +8666,23 @@ $.fn.modal = function(parameters) {
             module.hide();
           },
           click: function(event) {
+            if(!settings.closable) {
+              module.verbose('Dimmer clicked but closable setting is disabled');
+              return;
+            }
             var
               $target   = $(event.target),
               isInModal = ($target.closest(selector.modal).length > 0),
               isInDOM   = $.contains(document.documentElement, event.target)
             ;
-            if(!isInModal && isInDOM) {
+            if(!isInModal && isInDOM && module.is.active()) {
               module.debug('Dimmer clicked, hiding all modals');
-              if( module.is.active() ) {
-                module.remove.clickaway();
-                if(settings.allowMultiple) {
-                  module.hide();
-                }
-                else {
-                  module.hideAll();
-                }
+              module.remove.clickaway();
+              if(settings.allowMultiple) {
+                module.hide();
+              }
+              else {
+                module.hideAll();
               }
             }
           },
@@ -8605,6 +8729,8 @@ $.fn.modal = function(parameters) {
           ;
           module.refreshModals();
           module.set.dimmerSettings();
+          module.set.dimmerStyles();
+
           module.showModal(callback);
         },
 
@@ -8623,10 +8749,16 @@ $.fn.modal = function(parameters) {
             : function(){}
           ;
           if( module.is.animating() || !module.is.active() ) {
-
             module.showDimmer();
             module.cacheSizes();
-            module.set.position();
+            if(module.can.useFlex()) {
+              module.remove.legacy();
+            }
+            else {
+              module.set.legacy();
+              module.set.modalOffset();
+              module.debug('Using non-flex legacy modal positioning.');
+            }
             module.set.screenHeight();
             module.set.type();
             module.set.clickaway();
@@ -8704,6 +8836,7 @@ $.fn.modal = function(parameters) {
                   },
                   onComplete : function() {
                     settings.onHidden.call(element);
+                    module.remove.dimmerStyles();
                     module.restore.focus();
                     callback();
                   }
@@ -8728,6 +8861,7 @@ $.fn.modal = function(parameters) {
 
         hideDimmer: function() {
           if( $dimmable.dimmer('is animating') || ($dimmable.dimmer('is active')) ) {
+            module.unbind.scrollLock();
             $dimmable.dimmer('hide', function() {
               module.remove.clickaway();
               module.remove.screenHeight();
@@ -8793,7 +8927,13 @@ $.fn.modal = function(parameters) {
 
         save: {
           focus: function() {
-            $focusedElement = $(document.activeElement).blur();
+            var
+              $activeElement = $(document.activeElement),
+              inCurrentModal = $activeElement.closest($module).length > 0
+            ;
+            if(!inCurrentModal) {
+              $focusedElement = $(document.activeElement).blur();
+            }
           }
         },
 
@@ -8809,12 +8949,17 @@ $.fn.modal = function(parameters) {
           active: function() {
             $module.removeClass(className.active);
           },
+          legacy: function() {
+            $module.removeClass(className.legacy);
+          },
           clickaway: function() {
-            if(settings.closable) {
-              $dimmer
-                .off('click' + elementEventNamespace)
-              ;
-            }
+            $dimmer
+              .off('click' + elementEventNamespace)
+            ;
+          },
+          dimmerStyles: function() {
+            $dimmer.removeClass(className.inverted);
+            $dimmable.removeClass(className.blurring);
           },
           bodyStyle: function() {
             if($body.attr('style') === '') {
@@ -8844,11 +8989,13 @@ $.fn.modal = function(parameters) {
           $module.addClass(className.loading);
           var
             scrollHeight = $module.prop('scrollHeight'),
+            modalWidth   = $module.outerWidth(),
             modalHeight  = $module.outerHeight()
           ;
           if(module.cache === undefined || modalHeight !== 0) {
             module.cache = {
               pageHeight    : $(document).outerHeight(),
+              width         : modalWidth,
               height        : modalHeight + settings.offset,
               scrollHeight  : scrollHeight + settings.offset,
               contextHeight : (settings.context == 'body')
@@ -8862,6 +9009,12 @@ $.fn.modal = function(parameters) {
         },
 
         can: {
+          useFlex: function() {
+            return (settings.useFlex == 'auto')
+              ? settings.detachable && !module.is.ie()
+              : settings.useFlex
+            ;
+          },
           fit: function() {
             var
               contextHeight  = module.cache.contextHeight,
@@ -8883,6 +9036,13 @@ $.fn.modal = function(parameters) {
           active: function() {
             return $module.hasClass(className.active);
           },
+          ie: function() {
+            var
+              isIE11 = (!(window.ActiveXObject) && 'ActiveXObject' in window),
+              isIE   = ('ActiveXObject' in window)
+            ;
+            return (isIE11 || isIE);
+          },
           animating: function() {
             return $module.transition('is supported')
               ? $module.transition('is animating')
@@ -8894,7 +9054,7 @@ $.fn.modal = function(parameters) {
           },
           modernBrowser: function() {
             // appName for IE11 reports 'Netscape' can no longer use
-            return !(window.ActiveXObject || "ActiveXObject" in window);
+            return !(window.ActiveXObject || 'ActiveXObject' in window);
           }
         },
 
@@ -8912,11 +9072,9 @@ $.fn.modal = function(parameters) {
             }
           },
           clickaway: function() {
-            if(settings.closable) {
-              $dimmer
-                .on('click' + elementEventNamespace, module.event.click)
-              ;
-            }
+            $dimmer
+              .on('click' + elementEventNamespace, module.event.click)
+            ;
           },
           dimmerSettings: function() {
             if($.fn.dimmer === undefined) {
@@ -8927,8 +9085,11 @@ $.fn.modal = function(parameters) {
               defaultSettings = {
                 debug      : settings.debug,
                 dimmerName : 'modals',
-                variation  : false,
                 closable   : 'auto',
+                useFlex    : module.can.useFlex(),
+                variation  : settings.centered
+                  ? false
+                  : 'top aligned',
                 duration   : {
                   show     : settings.duration,
                   hide     : settings.duration
@@ -8941,6 +9102,11 @@ $.fn.modal = function(parameters) {
                 ? dimmerSettings.variation + ' inverted'
                 : 'inverted'
               ;
+            }
+            $context.dimmer('setting', dimmerSettings);
+          },
+          dimmerStyles: function() {
+            if(settings.inverted) {
               $dimmer.addClass(className.inverted);
             }
             else {
@@ -8952,7 +9118,21 @@ $.fn.modal = function(parameters) {
             else {
               $dimmable.removeClass(className.blurring);
             }
-            $context.dimmer('setting', dimmerSettings);
+          },
+          modalOffset: function() {
+            var
+              width = module.cache.width,
+              height = module.cache.height
+            ;
+            $module
+              .css({
+                marginTop: (settings.centered && module.can.fit())
+                  ? -(height / 2)
+                  : 0,
+                marginLeft: -(width / 2)
+              })
+            ;
+            module.verbose('Setting modal offset for legacy mode');
           },
           screenHeight: function() {
             if( module.can.fit() ) {
@@ -8971,36 +9151,22 @@ $.fn.modal = function(parameters) {
           scrolling: function() {
             $dimmable.addClass(className.scrolling);
             $module.addClass(className.scrolling);
+            module.unbind.scrollLock();
+          },
+          legacy: function() {
+            $module.addClass(className.legacy);
           },
           type: function() {
             if(module.can.fit()) {
               module.verbose('Modal fits on screen');
               if(!module.others.active() && !module.others.animating()) {
                 module.remove.scrolling();
+                module.bind.scrollLock();
               }
             }
             else {
               module.verbose('Modal cannot fit on screen setting to scrolling');
               module.set.scrolling();
-            }
-          },
-          position: function() {
-            module.verbose('Centering modal on page', module.cache);
-            if(module.can.fit()) {
-              $module
-                .css({
-                  top: '',
-                  marginTop: module.cache.topOffset
-                })
-              ;
-            }
-            else {
-              $module
-                .css({
-                  marginTop : '',
-                  top       : $document.scrollTop()
-                })
-              ;
             }
           },
           undetached: function() {
@@ -9196,6 +9362,9 @@ $.fn.modal.settings = {
   name           : 'Modal',
   namespace      : 'modal',
 
+  useFlex        : 'auto',
+  offset         : 0,
+
   silent         : false,
   debug          : false,
   verbose        : false,
@@ -9211,6 +9380,8 @@ $.fn.modal.settings = {
   inverted       : false,
   blurring       : false,
 
+  centered       : true,
+
   dimmerSettings : {
     closable : false,
     useCSS   : true
@@ -9223,7 +9394,6 @@ $.fn.modal.settings = {
 
   queue      : false,
   duration   : 500,
-  offset     : 0,
   transition : 'scale',
 
   // padding with edge of page
@@ -9263,6 +9433,7 @@ $.fn.modal.settings = {
     animating  : 'animating',
     blurring   : 'blurring',
     inverted   : 'inverted',
+    legacy     : 'legacy',
     loading    : 'loading',
     scrolling  : 'scrolling',
     undetached : 'undetached'
@@ -9273,7 +9444,7 @@ $.fn.modal.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Popup
+ * # Semantic UI 2.5.0 - Popup
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -9284,7 +9455,7 @@ $.fn.modal.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -9762,7 +9933,7 @@ $.fn.popup = function(parameters) {
           },
           content: function() {
             $module.removeData(metadata.content);
-            return $module.data(metadata.content) || $module.attr('title') || settings.content;
+            return $module.data(metadata.content) || settings.content || $module.attr('title');
           },
           variation: function() {
             $module.removeData(metadata.variation);
@@ -9776,9 +9947,10 @@ $.fn.popup = function(parameters) {
           },
           calculations: function() {
             var
-              targetElement    = $target[0],
-              isWindow         = ($boundary[0] == window),
-              targetPosition   = (settings.inline || (settings.popup && settings.movePopup))
+              $popupOffsetParent = module.get.offsetParent($popup),
+              targetElement      = $target[0],
+              isWindow           = ($boundary[0] == window),
+              targetPosition     = (settings.inline || (settings.popup && settings.movePopup))
                 ? $target.position()
                 : $target.offset(),
               screenPosition = (isWindow)
@@ -9822,6 +9994,17 @@ $.fn.popup = function(parameters) {
                 height : $boundary.height()
               }
             };
+
+            // if popup offset context is not same as target, then adjust calculations
+            if($popupOffsetParent.get(0) !== $offsetParent.get(0)) {
+              var
+                popupOffset        = $popupOffsetParent.offset()
+              ;
+              calculations.target.top -= popupOffset.top;
+              calculations.target.left -= popupOffset.left;
+              calculations.parent.width = $popupOffsetParent.outerWidth();
+              calculations.parent.height = $popupOffsetParent.outerHeight();
+            }
 
             // add in container calcs if fluid
             if( settings.setFluidWidth && module.is.fluid() ) {
@@ -9899,11 +10082,11 @@ $.fn.popup = function(parameters) {
             }
             return distanceFromBoundary;
           },
-          offsetParent: function($target) {
+          offsetParent: function($element) {
             var
-              element = ($target !== undefined)
-                ? $target[0]
-                : $module[0],
+              element = ($element !== undefined)
+                ? $element[0]
+                : $target[0],
               parentNode = element.parentNode,
               $node    = $(parentNode)
             ;
@@ -9911,14 +10094,14 @@ $.fn.popup = function(parameters) {
               var
                 is2D     = ($node.css('transform') === 'none'),
                 isStatic = ($node.css('position') === 'static'),
-                isHTML   = $node.is('html')
+                isBody   = $node.is('body')
               ;
-              while(parentNode && !isHTML && isStatic && is2D) {
+              while(parentNode && !isBody && isStatic && is2D) {
                 parentNode = parentNode.parentNode;
                 $node    = $(parentNode);
                 is2D     = ($node.css('transform') === 'none');
                 isStatic = ($node.css('position') === 'static');
-                isHTML   = $node.is('html');
+                isBody   = $node.is('body');
               }
             }
             return ($node && $node.length > 0)
@@ -10026,6 +10209,18 @@ $.fn.popup = function(parameters) {
             target = calculations.target;
             popup  = calculations.popup;
             parent = calculations.parent;
+
+            if(module.should.centerArrow(calculations)) {
+              module.verbose('Adjusting offset to center arrow on small target element');
+              if(position == 'top left' || position == 'bottom left') {
+                offset += (target.width / 2)
+                offset -= settings.arrowPixelsFromEdge;
+              }
+              if(position == 'top right' || position == 'bottom right') {
+                offset -= (target.width / 2)
+                offset += settings.arrowPixelsFromEdge;
+              }
+            }
 
             if(target.width === 0 && target.height === 0 && !module.is.svg(target.element)) {
               module.debug('Popup target is hidden, no action taken');
@@ -10262,11 +10457,11 @@ $.fn.popup = function(parameters) {
             if(settings.hideOnScroll === true || (settings.hideOnScroll == 'auto' && settings.on != 'click')) {
               module.bind.closeOnScroll();
             }
-            if(settings.on == 'hover' && openedWithTouch) {
-              module.bind.touchClose();
-            }
-            if(settings.on == 'click' && settings.closable) {
+            if(module.is.closable()) {
               module.bind.clickaway();
+            }
+            else if(settings.on == 'hover' && openedWithTouch) {
+              module.bind.touchClose();
             }
           },
           closeOnScroll: function() {
@@ -10320,7 +10515,22 @@ $.fn.popup = function(parameters) {
           }
         },
 
+        should: {
+          centerArrow: function(calculations) {
+            return !module.is.basic() && calculations.target.width <= (settings.arrowPixelsFromEdge * 2);
+          },
+        },
+
         is: {
+          closable: function() {
+            if(settings.closable == 'auto') {
+              if(settings.on == 'hover') {
+                return false;
+              }
+              return true;
+            }
+            return settings.closable;
+          },
           offstage: function(distanceFromBoundary, position) {
             var
               offstage = []
@@ -10341,6 +10551,9 @@ $.fn.popup = function(parameters) {
           },
           svg: function(element) {
             return module.supports.svg() && (element instanceof SVGGraphicsElement);
+          },
+          basic: function() {
+            return $module.hasClass(className.basic);
           },
           active: function() {
             return $module.hasClass(className.active);
@@ -10654,8 +10867,11 @@ $.fn.popup.settings = {
   // specify position to appear even if it doesn't fit
   lastResort     : false,
 
+  // number of pixels from edge of popup to pointing arrow center (used from centering)
+  arrowPixelsFromEdge: 20,
+
   // delay used to prevent accidental refiring of animations due to user error
-  delay        : {
+  delay : {
     show : 50,
     hide : 70
   },
@@ -10699,6 +10915,7 @@ $.fn.popup.settings = {
 
   className   : {
     active       : 'active',
+    basic        : 'basic',
     animating    : 'animating',
     dropdown     : 'dropdown',
     fluid        : 'fluid',
@@ -10760,7 +10977,7 @@ $.fn.popup.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Progress
+ * # Semantic UI 2.5.0 - Progress
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -10771,7 +10988,7 @@ $.fn.popup.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -11692,7 +11909,7 @@ $.fn.progress.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Search
+ * # Semantic UI 2.5.0 - Search
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -11703,7 +11920,7 @@ $.fn.progress.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -11763,6 +11980,7 @@ $.fn.search = function(parameters) {
 
         initialize: function() {
           module.verbose('Initializing module');
+          module.get.settings();
           module.determine.searchFields();
           module.bind.events();
           module.set.type();
@@ -12029,7 +12247,7 @@ $.fn.search = function(parameters) {
               apiSettings = {
                 debug             : settings.debug,
                 on                : false,
-                cache             : true,
+                cache             : settings.cache,
                 action            : 'search',
                 urlData           : {
                   query : searchTerm
@@ -12095,6 +12313,12 @@ $.fn.search = function(parameters) {
         },
 
         get: {
+          settings: function() {
+            if($.isPlainObject(parameters) && parameters.searchFullText) {
+              settings.fullTextSearch = parameters.searchFullText;
+              module.error(settings.error.oldSearchSyntax, element);
+            }
+          },
           inputEvent: function() {
             var
               prompt = $prompt[0],
@@ -12238,8 +12462,14 @@ $.fn.search = function(parameters) {
             ;
             module.set.loading();
             module.save.results(results);
-            module.debug('Returned local search results', results);
-
+            module.debug('Returned full local search results', results);
+            if(settings.maxResults > 0) {
+              module.debug('Using specified max results', results);
+              results = results.slice(0, settings.maxResults);
+            }
+            if(settings.type == 'category') {
+              results = module.create.categoryResults(results);
+            }
             searchHTML = module.generateResults({
               results: results
             });
@@ -12267,6 +12497,7 @@ $.fn.search = function(parameters) {
           object: function(searchTerm, source, searchFields) {
             var
               results      = [],
+              exactResults = [],
               fuzzyResults = [],
               searchExp    = searchTerm.toString().replace(regExp.escape, '\\$&'),
               matchRegExp  = new RegExp(regExp.beginsWith + searchExp, 'i'),
@@ -12275,9 +12506,10 @@ $.fn.search = function(parameters) {
               addResult = function(array, result) {
                 var
                   notResult      = ($.inArray(result, results) == -1),
-                  notFuzzyResult = ($.inArray(result, fuzzyResults) == -1)
+                  notFuzzyResult = ($.inArray(result, fuzzyResults) == -1),
+                  notExactResults = ($.inArray(result, exactResults) == -1)
                 ;
-                if(notResult && notFuzzyResult) {
+                if(notResult && notFuzzyResult && notExactResults) {
                   array.push(result);
                 }
               }
@@ -12298,7 +12530,6 @@ $.fn.search = function(parameters) {
               module.error(error.source);
               return [];
             }
-
             // iterate through search fields looking for matches
             $.each(searchFields, function(index, field) {
               $.each(source, function(label, content) {
@@ -12310,17 +12541,30 @@ $.fn.search = function(parameters) {
                     // content starts with value (first in results)
                     addResult(results, content);
                   }
-                  else if(settings.searchFullText && module.fuzzySearch(searchTerm, content[field]) ) {
+                  else if(settings.fullTextSearch === 'exact' && module.exactSearch(searchTerm, content[field]) ) {
+                    // content fuzzy matches (last in results)
+                    addResult(exactResults, content);
+                  }
+                  else if(settings.fullTextSearch == true && module.fuzzySearch(searchTerm, content[field]) ) {
                     // content fuzzy matches (last in results)
                     addResult(fuzzyResults, content);
                   }
                 }
               });
             });
-            return $.merge(results, fuzzyResults);
+            $.merge(exactResults, fuzzyResults)
+            $.merge(results, exactResults);
+            return results;
           }
         },
-
+        exactSearch: function (query, term) {
+          query = query.toLowerCase();
+          term  = term.toLowerCase();
+          if(term.indexOf(query) > -1) {
+             return true;
+          }
+          return false;
+        },
         fuzzySearch: function(query, term) {
           var
             termLength  = term.length,
@@ -12432,6 +12676,27 @@ $.fn.search = function(parameters) {
         },
 
         create: {
+          categoryResults: function(results) {
+            var
+              categoryResults = {}
+            ;
+            $.each(results, function(index, result) {
+              if(!result.category) {
+                return;
+              }
+              if(categoryResults[result.category] === undefined) {
+                module.verbose('Creating new category of results', result.category);
+                categoryResults[result.category] = {
+                  name    : result.category,
+                  results : [result]
+                }
+              }
+              else {
+                categoryResults[result.category].results.push(result);
+              }
+            });
+            return categoryResults;
+          },
           id: function(resultIndex, categoryIndex) {
             var
               resultID      = (resultIndex + 1), // not zero indexed
@@ -12469,7 +12734,10 @@ $.fn.search = function(parameters) {
               $selectedResult = (categoryIndex !== undefined)
                 ? $results
                     .children().eq(categoryIndex)
-                      .children(selector.result).eq(resultIndex)
+                      .children(selector.results)
+                        .first()
+                        .children(selector.result)
+                          .eq(resultIndex)
                 : $results
                     .children(selector.result).eq(resultIndex)
             ;
@@ -12890,8 +13158,8 @@ $.fn.search.settings = {
   // field to display in standard results template
   displayField   : '',
 
-  // whether to include fuzzy results in local search
-  searchFullText : true,
+  // search anywhere in value (set to 'exact' to require exact matches
+  fullTextSearch : 'exact',
 
   // whether to add events to prompt automatically
   automatic      : true,
@@ -12902,7 +13170,7 @@ $.fn.search.settings = {
   // delay before searching
   searchDelay    : 200,
 
-  // maximum results returned from local
+  // maximum results returned from search
   maxResults     : 7,
 
   // whether to store lookups in local cache
@@ -12938,14 +13206,15 @@ $.fn.search.settings = {
   },
 
   error : {
-    source      : 'Cannot search. No source used, and Semantic API module was not included',
-    noResults   : 'Your search returned no results',
-    logging     : 'Error in debug logging, exiting.',
-    noEndpoint  : 'No search endpoint was specified',
-    noTemplate  : 'A valid template name was not specified.',
-    serverError : 'There was an issue querying the server.',
-    maxResults  : 'Results must be an array to use maxResults setting',
-    method      : 'The method you called is not defined.'
+    source          : 'Cannot search. No source used, and Semantic API module was not included',
+    noResults       : 'Your search returned no results',
+    logging         : 'Error in debug logging, exiting.',
+    noEndpoint      : 'No search endpoint was specified',
+    noTemplate      : 'A valid template name was not specified.',
+    oldSearchSyntax : 'searchFullText setting has been renamed fullTextSearch for consistency, please adjust your settings.',
+    serverError     : 'There was an issue querying the server.',
+    maxResults      : 'Results must be an array to use maxResults setting',
+    method          : 'The method you called is not defined.'
   },
 
   metadata: {
@@ -13047,6 +13316,7 @@ $.fn.search.settings = {
             }
 
             // each item inside category
+            html += '<div class="results">';
             $.each(category.results, function(index, result) {
               if(result[fields.url]) {
                 html  += '<a class="result" href="' + result[fields.url] + '">';
@@ -13076,6 +13346,7 @@ $.fn.search.settings = {
               ;
               html += '</a>';
             });
+            html += '</div>';
             html  += ''
               + '</div>'
             ;
@@ -13144,7 +13415,7 @@ $.fn.search.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Sidebar
+ * # Semantic UI 2.5.0 - Sidebar
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -13155,7 +13426,7 @@ $.fn.search.settings = {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
@@ -14178,7 +14449,7 @@ $.fn.sidebar.settings = {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Site
+ * # Semantic UI 2.5.0 - Site
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -14666,7 +14937,7 @@ $.extend($.expr[ ":" ], {
 })( jQuery, window, document );
 
 /*!
- * # Semantic UI 2.2.13 - Transition
+ * # Semantic UI 2.5.0 - Transition
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -14677,7 +14948,7 @@ $.extend($.expr[ ":" ], {
 
 ;(function ($, window, document, undefined) {
 
-"use strict";
+'use strict';
 
 window = (typeof window != 'undefined' && window.Math == Math)
   ? window
