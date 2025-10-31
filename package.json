@@ -4,8 +4,14 @@
   "description": "Pre build semantic ui package to be included in `portal-vue`",
   "main": "index.js",
   "scripts": {
-    "build": "gulp --gulpfile semantic/gulpfile.js build"
+    "build": "gulp --gulpfile semantic/gulpfile.js build",
+    "prepare": "echo 'Using pre-built semantic UI assets'"
   },
+  "files": [
+    "semantic/dist",
+    "package.json",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/brandchamp/portal-vue-semantic.git"
