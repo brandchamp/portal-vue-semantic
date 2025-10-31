@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp --gulpfile semantic/gulpfile.js build",
-    "prepare": "echo 'Using pre-built semantic UI assets'"
+    "prepare": "node -e \"process.exit(0)\"",
+    "preinstall": "node -e \"process.exit(0)\"",
+    "install": "node -e \"process.exit(0)\"",
+    "postinstall": "node -e \"process.exit(0)\""
   },
   "files": [
     "semantic/dist",
